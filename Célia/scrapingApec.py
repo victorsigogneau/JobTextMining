@@ -77,15 +77,10 @@ class scraping_jobs_apec(scraping_jobs):
     #
     def scrap_job(self):
         ### paramètres pris
-        # les termes doivent être séparés par ' ' ou '%20'
         param_search_words = self.s_job 
-        # le numéro du département
-        #param_search_location = self.code_dpt
-
-        
         
         ### pages à parcourir
-        pages = [str(i) for i in range(0, 20)]  #### le nombre de pages voulu 
+        pages = [str(i) for i in range(0, 30)]  #### le nombre de pages voulu 
         requests = 0
         start_time = time()
         
@@ -96,14 +91,13 @@ class scraping_jobs_apec(scraping_jobs):
             #
             root_path = 'https://www.apec.fr/cms/webservices/rechercheOffre'
             payload = {
-                #'lieux': [param_search_location],
                 'typeClient': 'CADRE',
                 'sorts' : [{
                     'type': 'SCORE',
                     'direction': 'DESCENDING'
                 }],
                 'pagination': {
-                    'range': 20,
+                    'range': 30,
                     'startIndex': page
                 },
                 'activeFiltre': True,
@@ -122,15 +116,27 @@ class scraping_jobs_apec(scraping_jobs):
                 ### extraction des données du JSON renvoyé
                 for result in result_containers:
                     #
+                    if result['localisable'] == True:
+                        latitude = result['latitude'],
+                        longitude = result['longitude'],
+                    else:
+                        latitude = 0
+                        longitude = 0
                     dict_jobs.append({
                         'title' : result['intitule'],
                         'link' : 'https://www.apec.fr/candidat/recherche-emploi.html/emploi/detail-offre/'+result['numeroOffre'],
+                        'numero_offre' : result['numeroOffre'],
                         'location' : result['lieuTexte'],
                         'description' : result['texteOffre'],
                         'company' : result['nomCommercial'],
                         'note' : result['score'],
                         'salary' : result['salaireTexte'],
+                        'type_contrat' : result['typeContrat'],
                         'publication_date' : result['datePublication'],
+                        'date_actualisation' : result['dateValidation'],
+                        'latitude' : latitude,
+                        'longitude' : longitude,
+                        'duration_contrat' : result['contractDuration'],
                     })
             
         ### retourne array
