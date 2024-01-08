@@ -29,12 +29,11 @@ def generer_carte_france_pour_metier(contrat_id):
                                locations='Région',
                                locationmode='country names',
                                color='Valeur',
-                               color_continuous_scale='Viridis',
-                               title=f'Carte fictive de la France pour le métier : {contrat_id}')
+                               color_continuous_scale='Viridis')
     return fig_france
 
 # Fonction pour créer un Barplot avec une condition sur contratId
-def generer_barplot_pour_metier(contrat_id):
+def generer_barplot_diplome_pour_metier(contrat_id):
     # Ajoutez le code pour générer un Barplot avec des données fictives pour le contrat_id spécifié
     data_barplot = pd.DataFrame({
         'Langage': ['Python', 'Java', 'JavaScript', 'C#', 'Ruby'],
@@ -42,7 +41,7 @@ def generer_barplot_pour_metier(contrat_id):
     })
 
     # Création du Barplot avec Plotly Express
-    fig_barplot = px.bar(data_barplot, x='Langage', y='Popularité', title=f'Popularité des langages de programmation pour le métier : {contrat_id}', color_discrete_sequence=['#FF4B4B'])
+    fig_barplot = px.bar(data_barplot, x='Langage', y='Popularité', title=f'Popularité des diplômes pour le métier de : {contrat_id}', color_discrete_sequence=['#FF4B4B'])
 
     # Affichage du Barplot
     return fig_barplot
@@ -187,12 +186,13 @@ if selected_page == "Accueil":
 
         # Exemple de Carte fictive de la France pour le métier saisi
         st.subheader(f"Dans quel secteur ?")
+        st.write(f"On peut voir que la région de <requete ou il y a le moins> est déserte pour le métier de {recherche_metier} mais la région <requete ou il y en a le plus> la moyenne générale en france est de <requete moyenne offre region>.")
         carte_france_metier = generer_carte_france_pour_metier(recherche_metier)
         st.plotly_chart(carte_france_metier)
 
         # Exemple de Barplot fictif pour le métier saisi
         st.subheader(f"Quel diplôme ?")
-        barplot_fig_metier = generer_barplot_pour_metier(recherche_metier)
+        barplot_fig_metier = generer_barplot_diplome_pour_metier(recherche_metier)
         st.plotly_chart(barplot_fig_metier)
 
 
