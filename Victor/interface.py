@@ -117,17 +117,29 @@ tables = [table[0] for table in cursor.fetchall()]
 conn.close()
 
 # Sélection de la date avec le widget st.date_input
-selected_date = st.sidebar.date_input("Sélectionner une date", pd.to_datetime('today'))
+import streamlit as st
 
-# Création de l'interface Streamlit avec plusieurs onglets
-page = st.sidebar.selectbox("Sélectionnez un onglet :", ["Accueil", "Données", "Visualisation", "KPI"])
+# Titre de l'application
+st.sidebar.title("JobAPP")
 
-if page == "Accueil":
-    st.title("Bienvenue sur l'onglet Accueil")
-    st.write("Cette application permet d'explorer les données liées aux offres d'emploi, y compris des onglets pour afficher la liste des tables, une visualisation avec une carte de densité fictive de la France, un nuage de mots, et des KPI associés.")
+# Affichage des boutons dans la barre latérale
+selected_page = st.sidebar.radio("", ["Accueil", "Données", "Visualisation", "KPI"])
 
-elif page == "Données":
-    st.title("Base de donées")
+# Filtre pour l'année
+selected_year = st.sidebar.slider("Année :", min_value=2018, max_value=2024, value=2024)
+
+# Affichage du contenu en fonction de l'onglet sélectionné
+if selected_page == "Accueil":
+    st.title("Mieux comprendre les métiers qui nous entourent")
+    st.write("Cette application a pour objectif de fournir une compréhension approfondie des compétences demandées sur le marché de l'emploi en se basant sur les offres provenant de sites d'emploi renommés tels que Pôle Emploi et l'APEC. En explorant les données extraites de ces sources, les utilisateurs pourront analyser les tendances du marché, visualiser les différentes compétences recherchées, et obtenir des insights précieux pour orienter leurs choix professionnels. Que ce soit pour les demandeurs d'emploi cherchant à affiner leurs compétences ou les professionnels souhaitant rester informés des évolutions du marché du travail, cette application offre une plateforme interactive pour explorer et interpréter les données liées à l'emploi.")
+
+    # Barre de recherche en rouge
+    recherche_metier = st.text_input("Sélectionnez un métier", value='', key='recherche_metier')
+    st.markdown('<style>div.Widget.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
+    st.markdown('<style>div.Widget.row-widget.stRadio > div > label{background-color: #FF0000;color:#FFFFFF;}</style>', unsafe_allow_html=True)
+
+elif selected_page == "Données":
+    st.title("Base de données")
 
     # Liste des tables
     st.subheader("Liste des tables disponibles")
@@ -138,7 +150,7 @@ elif page == "Données":
     st.subheader("Tables  ")
     st.table(afficher_table("OffresEmploi_Faits"))
 
-elif page == "Visualisation":
+elif selected_page == "Visualisation":
     st.title("Visualisation avec Nuage de mots et Carte de la France")
     
     # Nuage de mots
@@ -156,12 +168,11 @@ elif page == "Visualisation":
     barplot_fig = generer_barplot()
     st.plotly_chart(barplot_fig)
 
-elif page == "KPI":
+elif selected_page == "KPI":
     st.title("Indicateurs Clés de Performance (KPI)")
     
     # Affichage des KPI avec la date sélectionnée
-    st.metric("Nombre d'offres", calculer_nombre_offres(selected_date))
-    st.metric("Nombre d'entreprises", calculer_nombre_entreprises(selected_date))
-    st.metric("Nombre de villes", calculer_nombre_villes(selected_date))   
-    st.metric("Évolution d'offres par année (%)", calculer_evolution_offres(selected_date))
-   
+    st.metric("Nombre d'offres", calculer_nombre_offres(selected_year))
+    st.metric("Nombre d'entreprises", calculer_nombre_entreprises(selected_year))
+    st.metric("Nombre de villes", calculer_nombre_villes(selected_year))   
+    st.metric("Évolution d'offres par année (%)", calculer_evolution_offres(selected_year))
