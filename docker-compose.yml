@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  interface:
+    image: interface
+    build:
+      context: ./Victor
+      dockerfile: dockerfile
+    ports:
+    - 8501:8501
+
