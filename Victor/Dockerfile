@@ -1,18 +1,16 @@
-### j'attends un peu avant de tester ##
 
-#nom image :> interface
 
-FROM python:3.12.1
+#nom image :> streamlit_job:0.1
 
-COPY requirement.txt /Victor/requirements.txt
+FROM python:3.9-slim
+
+COPY . /Victor
 WORKDIR /Victor
 
-RUN pip install -r requirements.txt
+RUN pip install streamlit
 
-COPY interface2.py interface2.py
+RUN pip install -r requirement.txt
 
-#COPY job_mining2.db job_mining2.db
 
-CMD ['streamlit', 'run', "interafce2.py"]
+CMD ["streamlit", "run", "interface2.py"]
 
-##le docker compose pas necessaire en fait ?? ###
