@@ -202,7 +202,6 @@ def generer_carte_region_pour_metier(recherche_metier_nettoye):
     )
 
     # On ajuste les paramètres graphiques de la carte
-    # On ajuste les paramètres graphiques de la carte
     fig_region.update_layout(
         # On change ces dimensions
         autosize=False,
@@ -270,7 +269,7 @@ def generer_carte_departement_pour_metier(recherche_metier_nettoye):
         color='Valeur',  # Remplacez Valeur fonciere par la colonne que vous voulez utiliser pour le remplissage
         color_continuous_scale='YlOrRd',  # La palette de couleur utilisée
         featureidkey="properties.libgeo",  # Indiquez le chemin aux IDs dans le GeoJSON
-        range_color=[0, 5]  # Indiquez la plage de la légende
+        range_color=[0,dep_carte_data['Valeur'].max()]  # Indiquez la plage de la légende
     )
     fig_region.update_geos(
         center={"lat": 46.6031, "lon": 1.8883},  # On centre la carte sur une coordonnée légèrement sur la droite de la france pour un meilleur affichage
