@@ -205,9 +205,8 @@ def generer_carte_region_pour_metier(recherche_metier_nettoye):
     fig_region.update_layout(
         # On change ces dimensions
         autosize=False,
-        width=1000,
-        height=1000,
         coloraxis_showscale=True,
+        geo=dict(bgcolor='rgba(255, 255, 255, 0)'),
         margin={"r":0,"t":0,"l":0,"b":0},
         coloraxis_colorbar=dict(
         thickness=15,  # Ajustez l'épaisseur de la légende
@@ -282,10 +281,9 @@ def generer_carte_departement_pour_metier(recherche_metier_nettoye):
     fig_region.update_layout(
         # On change ces dimensions
         autosize=False,
-        width=1000,
-        height=1000,
         coloraxis_showscale=True,
-        margin={"r":0,"t":0,"l":0,"b":0}
+        margin={"r":0,"t":0,"l":0,"b":0},
+        geo=dict(bgcolor='rgba(255, 255, 255, 0)')
     )
 
 
