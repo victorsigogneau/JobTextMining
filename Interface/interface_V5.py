@@ -414,27 +414,6 @@ def max_min_region(recherche_metier_nettoye):
 
     return message
 
-# Fonction pour calculer l'évolution d'offre par année en pourcentage avec une condition sur contratId
-def calculer_evolution_offres_pour_metier(recherche_metier_nettoye, date_filtre):
-    conn = sqlite3.connect('job_mining.db')
-    cursor = conn.cursor()
-    
-    # Requête SQL pour obtenir le nombre d'offres créées en 2022 pour le contrat_id spécifié
-    cursor.execute(f"SELECT COUNT(DISTINCT id) FROM OffresEmploi_Faits WHERE poste LIKE '%{recherche_metier_nettoye}%' AND dateCreation BETWEEN '2022-01-01' AND '2022-12-31' AND strftime('%Y', dateCreation) = '{date_filtre}';")
-    offres_2022 = cursor.fetchone()[0]
-    
-    # Requête SQL pour obtenir le nombre d'offres créées en 2023 pour le contrat_id spécifié
-    cursor.execute(f"SELECT COUNT(DISTINCT id) FROM OffresEmploi_Faits WHERE poste LIKE '%{recherche_metier_nettoye}%' AND dateCreation BETWEEN '2023-01-01' AND '2023-12-31' AND dateCreation <= '{date_filtre}';")
-    offres_2023 = cursor.fetchone()[0]
-    
-    conn.close()
-    
-    # Calcul de l'évolution en pourcentage
-    if offres_2022 == 0:
-        return 0  # Éviter une division par zéro
-    else:
-        evolution = ((offres_2023 - offres_2022) / offres_2022) * 100
-        return round(evolution, 2)
     
 #####################
 # Analyses Globales #
@@ -512,33 +491,45 @@ def plot_metiers(resultat):
     # Votre code pour créer yr_5
     yr_5 = resultat.groupby('poste').count().sort_values('id', ascending=False).head(6)
 
-    # Créer un graphique à barres avec seaborn
-    fig = plt.figure(figsize=(5, 5))
-    sns.barplot(x='id', y='poste', data=yr_5, color='purple')
-    plt.title('Top 6 des postes les plus fréquents')
-    plt.xlabel('Nombre de résultats')
-    plt.ylabel('Poste')
-    
+
+    # Créer un graphique à barres interactif avec Plotly Express
+    fig = px.bar(yr_5, x=yr_5.index, y='id', orientation='v',
+                 labels={'id': 'Nombre de résultats', 'poste': 'Poste'} )
+
+    # Personnaliser la mise en page
+    fig.update_layout(
+        xaxis_title_font=dict(size=14),
+        yaxis_title_font=dict(size=14),
+        font=dict(size=12),
+        showlegend=False  # Masquer la légende car la couleur est utilisée pour représenter la valeur
+    )
     return fig
 
 def plot_mois(resultat):
     monthly_counts = resultat['Mois'].value_counts().sort_index()
-    fig, ax = plt.subplots()
-    ax.bar(monthly_counts.index, monthly_counts.values, color='purple')
 
-    # Ajouter des étiquettes et des titres
-    ax.set_xlabel('Mois')
-    ax.set_ylabel('Nombre d offres')
-    ax.set_title('Nombre d offres par mois')
+    # Créer un graphique barre avec Plotly Express
+    fig = px.bar(x=monthly_counts.index, y=monthly_counts.values, 
+                 labels={'x': 'Mois', 'y': 'Nombre d\'offres'})
+
+    # Personnaliser la mise en page
+    fig.update_layout(
+        xaxis_title_font=dict(size=14),
+        yaxis_title_font=dict(size=14),
+        font=dict(size=12),
+        showlegend=False  # Masquer la légende car la couleur est utilisée pour représenter la valeur
+    )
+
     return fig
 
 def cam_contrat(resultat):
     count_by_category = resultat['typeContrat'].value_counts()
-    fig, ax = plt.subplots()
-    ax.pie(count_by_category, labels=count_by_category.index, autopct='%1.1f%%', startangle=90)
 
-    # Ajouter le titre
-    ax.set_title('Diagramme en camembert des types de contrat')
+    # Créer un graphique de type camembert avec Plotly Express
+    fig = px.pie(count_by_category, names=count_by_category.index, values=count_by_category.values,
+                 labels={'names': 'Type de Contrat', 'values': 'Nombre'},
+                 hole=0) 
+
     return fig
 
 def salaire_m(resultat):
@@ -552,6 +543,7 @@ def salaire_m(resultat):
     salaire_moyen = round(salaire_moyen, 2)
     return salaire_moyen
 
+
 def salaire_negociation(resultat):
     
     valeur = ''
@@ -561,13 +553,16 @@ def salaire_negociation(resultat):
     # Compter le nombre de lignes avec et sans valeurs nulles
     count_values = resultat['Salchiffre'].count()
     count_null = mask_null.sum()
-    print(count_null)
-    # Créer un diagramme en camembert avec Plotly Express
-    fig = px.pie(names=['Salaire fixé par l entreprise', 'A négocier'], values=[count_values, count_null],
-                labels=['Salaire fixé par l entreprise', 'A négocier'],
-                title='Salaire à négocier avec l employeur ou non',
-                hole=0.3  # Ajustez le trou si nécessaire
-                )
+
+    labels = ['Salaire fixé par l entreprise', 'A négocier']
+    values = [count_values, count_null]
+
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, textinfo='label+percent',
+                                 insidetextorientation='radial',showlegend=False
+                                )])
+
+    fig.update_layout(showlegend=False)
+
     return fig
 
 ###########ETUDE CORPUS #########################
@@ -698,6 +693,18 @@ def visu_tfidf(resultat):
     # Affichez le graphe
     plt.show()
     
+############################## TABLES #####################################
+def charger_table(selected_table):
+    # Connexion à la base de données
+    conn = sqlite3.connect('job_mining.db')
+
+    # Charger les données de la table sélectionnée depuis la base de données
+    query = f'SELECT * FROM {selected_table}'
+    df = pd.read_sql_query(query, conn)
+
+    # Fermer la connexion à la base de données
+    conn.close()
+    return df
 
 
 #############
@@ -733,21 +740,23 @@ st.markdown(
 )
 # Changer le nom de l'onglet Streamlit
 
-# Filtres
-st.sidebar.title("Filtres")
+
 # Année
 # selected_year = st.sidebar.slider("Année :", min_value=2018, max_value=2024, value=2024)
 #Régions (requete SQL plus tard)
-regions_france = ["Toute la France","Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Bretagne", "Centre-Val de Loire", "Corse", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandie", "Nouvelle-Aquitaine", "Occitanie", "Pays de la Loire", "Provence-Alpes-Côte d'Azur"]
-# Sélection de la région dans la barre latérale
-selected_region = st.sidebar.selectbox("Région", regions_france)
 
-selected_page = st.sidebar.radio("Sélectionnez une page", ["Accueil", "Analyse"])
+st.sidebar.title("JobAPP")
+selected_page = st.sidebar.radio("Sélectionnez une page", ["Accueil", "Analyse",'Tables'])
 # Page principale
 #selected_page="Accueil"
 
 # Affichage du contenu 
 if selected_page == "Accueil":
+    # Filtres
+    st.sidebar.title("Filtres")
+    regions_france = ['Toute la France','Auvergne-Rhone-Alpes','Bourgogne-Franche-Comte','Bretagne','Centre-Val de Loire','Corse','Grand-Est','Guadeloupe','Guyane','Hauts-de-France','Ile-de-France','La Reunion','Martinique','Mayotte','Normandie','Nouvelle Aquitaine','Occitanie','Pays de la Loire','Provence-Alpes-Cote d\'Azur']
+    # Sélection de la région dans la barre latérale
+    selected_region = st.sidebar.selectbox("Région", regions_france)
     st.title("JobAPP : Mieux comprendre")
     st.write("Cette application a pour objectif de fournir une compréhension approfondie des compétences demandées sur le marché de l'emploi en se basant sur les offres provenant de sites d'emploi renommés tels que Pôle Emploi et l'APEC. En explorant les données extraites de ces sources, les utilisateurs pourront analyser les tendances du marché, visualiser les différentes compétences recherchées, et obtenir des insights précieux pour orienter leurs choix professionnels. Que ce soit pour les demandeurs d'emploi cherchant à affiner leurs compétences ou les professionnels souhaitant rester informés des évolutions du marché du travail, cette application offre une plateforme interactive pour explorer et interpréter les données liées à l'emploi.")
 
@@ -822,43 +831,48 @@ elif selected_page == "Analyse":
     
     recherche = traitement()
     
+    # Metiers les plus recherchés par les entreprises
     st.subheader(f"Les metiers les plus recherchés en entreprise")
     metier = plot_metiers(recherche)
-    st.pyplot(metier)
-    st.write(f"Nous avons ici les métiers avec le plsu de nombres d'offres, les entreprises recherchent enorment de data analyst ")
+    st.plotly_chart(metier)
+    st.write(f"Nous avons ici les métiers avec le plus de nombres d'offres d'emploi, les entreprises recherchent énorment de data analyst ")
 
-    
-    col1, col2 = st.columns(2)
+    # Répartion des types de contrat
+    st.subheader(f"Les types de contrat")
+    barplot_fig_metier = cam_contrat(recherche)
+    st.plotly_chart(barplot_fig_metier)
+    st.write(f"Voici une représentation des contrats souhaités par les entreprises pour les métiers dans la Data. On aperçoit logiquement que les entreprises recherchent des CDI.")    
 
-    with col1:
-        st.subheader(f"Nombre d'offres par mois pour janvier 2024")
-        barplot_fig_metier = plot_mois(recherche)
-        st.pyplot(barplot_fig_metier)
-        st.write(f"Les rechercehs d'emplois ont éété effectués en Janvier 2024, ainsi les annopnce sont regroupés sur les mois de fin 2023 et debut 2024")
+    # Nombre d'iffre d'emplo
+    st.subheader(f"Répartition mensuelles des publications des offres")
+    barplot_fig_metier = plot_mois(recherche)
+    st.plotly_chart(barplot_fig_metier)
+    st.write(f"Les recheches d'emplois ont été effectués en Janvier 2024, ainsi les annonces sont regroupés sur les mois de fin 2023 et debut 2024")
 
-    with col2:
-        st.subheader(f"Les types de contrat")
-        barplot_fig_metier = cam_contrat(recherche)
-        st.pyplot(barplot_fig_metier)
-        st.write(f"Voici une représentation des contrat souhaités par les entreprises pour les métiers dans la Data")
-     
+         
     col3, col4 = st.columns(2)
     
     with col3:
         st.subheader(f"Salaire moyen")
-        st.subheader(salaire_m(recherche))
-        st.write(f"Voici le salaire moyen en milliers par an pour les metiers de la data")
+        st.subheader(f"{salaire_m(recherche) * 1000} €")
+        st.write(f"C'est le salaire moyen que perçoivent les métiers de la data")
+        st.markdown('<div class="vertical-center">', unsafe_allow_html=True)
+
     with col4:
-        st.subheader(f"Salaire à negocier ?")
+        st.subheader(f"Salaire à négocier ?")
         cam_nego = salaire_negociation(recherche)
-        st.plotly_chart(cam_nego) 
-        st.write("Nous ponvons voir aussi que certains employeurs ne décrivent pas dans leurs annonces le salaire qu'ils souhaitent attribuer pour le poste")
-    
+        st.plotly_chart(cam_nego, use_container_width=True)  # Utilisez use_container_width pour occuper toute la largeur
+        st.write("Nous pouvons voir aussi que certains employeurs ne décrivent pas dans leurs annonces le salaire qu'ils souhaitent attribuer pour le poste")
+
+        # Fermez la classe CSS pour centrer verticalement
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
     st.subheader(f"Analyses sur le corpus des descriptions")
 
     corpus_mot = corpus_mots(recherche)
     st.plotly_chart(corpus_mot)
-    st.write(f"Voici une analyse du corpus utilisé, nous pouvons voirs le nombres de mots utilisés dans les descriptions principalement les descriptions contiennt moins de 500 mots (apres nettoyage) ") 
+    st.write(f"Voici une analyse du corpus utilisé, nous pouvons voirs le nombres de mots utilisés dans les descriptions principalement les descriptions contienent moins de 500 mots (après nettoyage) ") 
     
 
     mots = frequ_corspus(recherche)
@@ -869,7 +883,23 @@ elif selected_page == "Analyse":
 
     dendo = TF_IDF_dendogram(recherche)
     st.pyplot(dendo) 
-    st.write(f"Voici le dendogram apres un traitement tf_idf sur le corpus de description, ensuite un cluestering a été effectué comme nous pouvons le voir les descriptions se separe en 2 Classes différentes ")
-        
+    st.write(f"Voici le dendrogramme résultant d'un traitement TF-IDF appliqué au corpus de descriptions.")
+    st.write(f"Par la suite, une analyse de clustering a été effectuée, mettant en évidence une séparation nette en deux classes distinctes au sein des descriptions.") 
+    st.write(f"Cette observation suggère une structuration significative du contenu des descriptions, avec des similitudes marquées au sein de chaque classe et des différences notables entre les deux.")
+
+elif selected_page == "Tables":
+    # Liste des tables
+    tables = ['LieuTravail_Dimension', 'Entreprise_Dimension', 'OrigineOffre_Dimension', 'Qualification_Dimension', 'OffresEmploi_Faits']
+    # Sélection de la table à afficher
+    selected_table = st.selectbox('Sélectionnez la table à afficher', tables)
+
+    # Charger les données de la table sélectionnée
+    df_selected = charger_table(selected_table)
+
+    # Afficher les données de la table sélectionnée
+    st.write(f'Données de la table {selected_table}')
+    st.dataframe(df_selected)
+
+
     #visu_tfidf(recherche)
     #st.pyplot()
