@@ -11,8 +11,7 @@ Ce projet vise à analyser le marché de l'emploi en France en utilisant des tec
 ## Exécution du Projet
 
 ### Prérequis
-- Python installé (version recommandée: 3.x)
-- Packages Python: Voir `requirements.txt`
+- Docker installé
 
 ### Installation
 1. Clonez le référentiel: `git clone https://github.com/votre-utilisateur/projet-text-mining.git`
@@ -30,7 +29,6 @@ Ce projet vise à analyser le marché de l'emploi en France en utilisant des tec
 - `interface/`: Dans ce répertoire, vous trouverez tous les composants nécessaires au lancement de l'application.
   - `interface.py`: Code source de l'application Streamlit.
   - `functions.py`: Functions de l'application Streamlit.
-- `requirements.txt`: Fichier spécifiant les dépendances Python nécessaires pour le projet.
 
 - `README.md`: Vous êtes ici!
 
