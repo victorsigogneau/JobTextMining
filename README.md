@@ -4,7 +4,6 @@
 Ce projet vise à analyser le marché de l'emploi en France en utilisant des techniques de text mining. Les données sont extraites de sources telles que l'API de Pôle Emploi et le web scraping sur l'APEC.
 
 ## Contenu du Projet
-- **Rapport LaTeX**: Le rapport principal du projet est rédigé en LaTeX. Vous pouvez le trouver dans le fichier `rapport.tex`.
 - **Scripts Python**: Les scripts Python utilisés pour l'extraction, le traitement et l'analyse des données se trouvent dans le répertoire `scripts`.
 - **Base de Données SQLite**: Les données sont stockées dans une base de données SQLite. Le schéma de la base de données est documenté dans le rapport.
 - **Application Streamlit**: L'interface utilisateur interactive est construite avec Streamlit. Consultez le fichier `app.py` pour explorer l'application.
@@ -12,8 +11,7 @@ Ce projet vise à analyser le marché de l'emploi en France en utilisant des tec
 ## Exécution du Projet
 
 ### Prérequis
-- Python installé (version recommandée: 3.x)
-- Packages Python: Voir `requirements.txt`
+- Docker installé
 
 ### Installation
 1. Clonez le référentiel: `git clone https://github.com/votre-utilisateur/projet-text-mining.git`
@@ -25,20 +23,24 @@ Ce projet vise à analyser le marché de l'emploi en France en utilisant des tec
 2. Ouvrez votre navigateur et accédez à l'URL indiquée par Streamlit.
 
 ## Structure du Répertoire
-- `scripts/`: Scripts Python pour l'extraction et le traitement des données.
-- `data/`: Emplacement des données extraites.
-- `app.py`: Code source de l'application Streamlit.
-- `rapport.tex`: Rapport principal en LaTeX.
+- `data/`: Ce répertoire contient les données extraites et peut également inclure les données prétraitées. 
+    - `ExtractDATA_LoadDB.ipynb`: Script d'extraction et de prétraitement des données.
+    - `analyses_globales.ipynb`: Analyses NLP globales utiles et mise en prodcution dans le Stramlit.
+    - `departements-region.xlsx`: Tables des correspondances des régions, départements
+
+- `interface/`: Dans ce répertoire, vous trouverez tous les composants nécessaires au lancement de l'application.
+  - `interface.py`: Code source de l'application Streamlit.
+  - `functions.py`: Functions de l'application Streamlit.
+  - `job_mining.db`: Base de données SQLite.
+  - `departement.json`: Coordonées des départements.
+  - `regions.json`: Coordonnées des régions.
+  - `departements-region.xlsx`: Tables des correspondances des régions, départements
+
 - `README.md`: Vous êtes ici!
 
-## Contribution
-- Pour contribuer au projet, veuillez créer une nouvelle branche pour vos modifications: `git checkout -b nom-de-votre-branche`
-- Soumettez une demande d'extraction (Pull Request) lorsque vos modifications sont prêtes à être intégrées.
-
 ## Auteurs
-- Votre Nom
-- Collaborateur 1
-- Collaborateur 2
+- Cyrielle Barailler
+- Célia Maurin
+- Victor Sigogneau
 
-## Licence
-Ce projet est sous licence [MIT](LICENSE).
+
