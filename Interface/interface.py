@@ -52,7 +52,7 @@ if selected_page == "Accueil":
 
 
 # Champ de saisie de texte - barre de recherche
-    st.subheader(f"Quel métier voulez-vous connaitre?")
+    st.subheader(f"Quel métier voulez-vous connaître?")
     recherche_metier = st.text_input("", value='', key='recherche_metier')
     st.markdown('<style>div.Widget.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
     st.markdown('<style>div.Widget.row-widget.stRadio > div > label{background-color: #FF0000;color:#FFFFFF;}</style>', unsafe_allow_html=True)
@@ -81,7 +81,7 @@ if selected_page == "Accueil":
             f"{calculer_nombre_villes_pour_metier(recherche_metier,selected_region)}🗺️"
             f"</div>"
             f"<div style='border: 2px solid white; padding:10px; border-radius:10px; text-align: center;'>"
-            f"<strong style='color:#FF4B4B;'>Salaire moyen :</strong><br>"
+            f"<strong style='color:#FF4B4B;'>Salaire moyen annuel :</strong><br>"
             f"{salaire_m_recherche(recherche_metier,selected_region)* 1000}€💵"
             f"</div>"
             f"</div>"
@@ -114,7 +114,7 @@ if selected_page == "Accueil":
 # Affichage Analyse     
 elif selected_page == "Analyse":
 
-    st.title("Analyse des données d'offres d'emplois Data")
+    st.title("Analyse des données d'offres d'emploi Data")
     recherche = traitement()
     
     # Metiers les plus recherchés par les entreprises
@@ -127,21 +127,21 @@ elif selected_page == "Analyse":
     st.subheader(f"Les types de contrat")
     barplot_fig_metier = cam_contrat(recherche)
     st.plotly_chart(barplot_fig_metier)
-    st.write(f"Voici une représentation des contrats souhaités par les entreprises pour les métiers dans la Data. On aperçoit logiquement que les entreprises recherchent majoritairement des CDI.")    
+    st.write(f"Voici une représentation des contrats souhaités par les entreprises pour les métiers dans la Data. On aperçoit que les entreprises recherchent majoritairement des CDI.")    
 
     # Nombre d'offre d'emploi
-    st.subheader(f"Répartition mensuelles des publications des offres")
+    st.subheader(f"Répartition mensuelle des publications des offres")
     barplot_fig_metier = plot_mois(recherche)
     st.plotly_chart(barplot_fig_metier)
-    st.write(f"Les recherches d'emplois ont été effectués en Janvier 2024, ainsi les annonces sont regroupés sur les mois de fin 2023 et debut 2024")
+    st.write(f"Les recherches d'emploi ont été effectués en Janvier 2024, ainsi les annonces sont regroupées sur les mois de fin 2023 et début 2024")
 
     # Separtion en deux colonnes
     col3, col4 = st.columns(2)
     with col3:
         # Salaire moyen 
-        st.subheader(f"Salaire moyen")
+        st.subheader(f"Salaire moyen annuel")
         st.subheader(f"{salaire_m(recherche) * 1000} €")
-        st.write(f"C'est le salaire moyen que perçoivent les métiers de la data")
+        st.write(f"C'est le salaire moyen annuel perçu par les métiers de la Data")
         st.markdown('<div class="vertical-center">', unsafe_allow_html=True)
 
     with col4:
@@ -149,7 +149,7 @@ elif selected_page == "Analyse":
         st.subheader(f"Salaire à négocier ?")
         cam_nego = salaire_negociation(recherche)
         st.plotly_chart(cam_nego, use_container_width=True)  # Utilisez use_container_width pour occuper toute la largeur
-        st.write("Nous pouvons voir aussi que certains employeurs ne décrivent pas dans leurs annonces le salaire qu'ils souhaitent attribuer pour le poste")
+        st.write("Nous pouvons voir que certains employeurs ne décrivent pas dans leurs annonces le salaire qu'ils souhaitent attribuer pour le poste")
         st.markdown("</div>", unsafe_allow_html=True)
 
     # Analyse des descriptions
@@ -158,10 +158,10 @@ elif selected_page == "Analyse":
     # Les mots les plus fréquents
     corpus_mot = corpus_mots(recherche)
     st.plotly_chart(corpus_mot)
-    st.write(f"Voici une analyse du corpus utilisé, nous pouvons voir le nombres de mots dans les descriptions. Généralement les descriptions contiennent moins de 500 mots (après nettoyage) ") 
+    st.write(f"Voici une analyse du corpus utilisé, nous pouvons voir le nombre de mot dans les descriptions. Généralement les descriptions contiennent moins de 500 mots (après nettoyage) ") 
     mots = frequ_corspus(recherche)
     st.plotly_chart(mots)
-    st.write(f"Nous pouvons voir ici les mots les plus utilisé dans les descriptions")
+    st.write(f"Nous pouvons voir ici les mots les plus utilisés dans les descriptions")
     
     # Matrice Tf_IDF
     st.subheader(f"TF_IDF")
@@ -169,7 +169,7 @@ elif selected_page == "Analyse":
     # Clustering des offres
     dendo = TF_IDF_dendogram(recherche)
     st.pyplot(dendo) 
-    st.write(f"Voici le dendrogramme résultant d'un traitement TF-IDF appliqué au corpus de descriptions.")
+    st.write(f"Voici le dendrogramme résultant d'un traitement TF-IDF appliqué au corpus des descriptions.")
     st.write(f"Par la suite, une analyse de clustering a été effectuée, mettant en évidence une séparation nette en deux classes distinctes au sein des descriptions.") 
     st.write(f"Cette observation suggère une structuration significative du contenu des descriptions, avec des similitudes marquées au sein de chaque classe et des différences notables entre les deux.")
 
