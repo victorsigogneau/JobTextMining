@@ -1,8 +1,17 @@
 # Projet Informatique - Text Mining sur le Marché de l'Emploi
 
 ## Introduction
-Ce projet vise à analyser le marché de l'emploi en France en utilisant des techniques de text mining. Les données sont extraites de sources telles que l'API de Pôle Emploi et le web scraping sur l'APEC.
-
+Ce projet vise à explorer le marché de l’emploi en France. Pour cela, nous avons choisi de nous foca-
+liser spécifiquement sur les opportunités dans le domaine de la data. En utilisant des techniques de web
+scraping, nous avons collecté des données provenant d’offres d’emploi de l’APEC et de Pôle emploi. Ces
+données ont alimenté une base de données modélisée comme un entrepôt, stockée dans SQLite.
+Notre projet inclut une application web interactive développée avec Streamlit, offrant aux utilisateurs
+une exploration facile et des analyses visuelles des offres d’emploi. L’application intègre également une di-
+mension régionale pour des représentations cartographiques interactives. Enfin, pour une facilité d’accès,
+l’application est encapsulée dans une image Docker, simplifiant ainsi le déploiement pour les utilisateurs.
+Dans ce rapport, nous allons détailler notre méthodologie, la structure de la base de données, l’archi-
+tecture de l’application Streamlit, ainsi que les résultats issus de l’analyse des offres d’emploi liées à la
+data.
 ## Contenu du Projet
 - **Scripts Python**: Les scripts Python utilisés pour l'extraction, le traitement et l'analyse des données se trouvent dans le répertoire `scripts`.
 - **Base de Données SQLite**: Les données sont stockées dans une base de données SQLite. Le schéma de la base de données est documenté dans le rapport.
