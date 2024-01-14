@@ -1,8 +1,7 @@
 # Text Mining sur le Marché de l'Emploi
 
 ## Introduction
-Ce projet vise à explorer le marché de l’emploi en France. Pour cela, nous avons choisi de nous foca-
-liser spécifiquement sur les opportunités dans le domaine de la data. En utilisant des techniques de web
+Ce projet vise à explorer le marché de l’emploi en France. Pour cela, nous avons choisi de nous focaliser spécifiquement sur les opportunités dans le domaine de la data. En utilisant des techniques de web
 scraping, nous avons collecté des données provenant d’offres d’emploi de l’APEC et de Pôle emploi. Ces
 données ont alimenté une base de données modélisée comme un entrepôt, stockée dans SQLite.
 
