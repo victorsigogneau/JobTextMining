@@ -23,7 +23,6 @@ l’application est encapsulée dans une image Docker, simplifiant ainsi le dép
 ### Installation
 1. Clonez le référentiel: `git clone https://github.com/votre-utilisateur/projet-text-mining.git`
 2. Accédez au répertoire du projet: `cd projet-text-mining`
-3. Installez les dépendances: `pip install -r requirements.txt`
 
 ### Exécution
 1. `cd src/`
