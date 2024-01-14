@@ -26,8 +26,8 @@ l’application est encapsulée dans une image Docker, simplifiant ainsi le dép
 3. Installez les dépendances: `pip install -r requirements.txt`
 
 ### Exécution
-1. Exécutez l'application Streamlit: `streamlit run app.py`
-2. Ouvrez votre navigateur et accédez à l'URL indiquée par Streamlit.
+1. `cd src/`
+2. `docker compose -up`
 
 ## Structure du Répertoire
 - `data/`: Ce répertoire contient les données extraites et peut également inclure les données prétraitées. 
