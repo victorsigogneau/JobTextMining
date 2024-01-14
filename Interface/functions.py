@@ -34,10 +34,8 @@ import warnings
 # Ignorer tous les avertissements
 warnings.filterwarnings("ignore")
 
-#********************************
-#fonction pour nettoyage document (chaîne de caractères)
-#le document revient sous la forme d'une liste de tokens
-#********************************
+################### Nettoyage document ###################
+
 def nettoyage_doc(doc_param):
     ponctuations = list(string.punctuation)
 
@@ -64,16 +62,14 @@ def nettoyage_doc(doc_param):
     #fin
     return doc
 
-#************************************************************
-#fonction pour nettoyage corpus
-#attention, optionnellement les documents vides sont éliminés
-#************************************************************
+################### Nettoyage corpus ###################
+
 def nettoyage_corpus(corpus,vire_vide=True):
     #output
     output = [nettoyage_doc(doc) for doc in corpus if ((len(doc) > 0) or (vire_vide == False))]
     return output
 
-######################### NUAGE DE MOTS #########################
+################### NUAGE DE MOTS ###################
 
 
 def extraire_competences(description):
@@ -96,7 +92,7 @@ def extraire_competences(description):
     
     return competences
 
-# Fonction pour créer un nuage de mots avec une condition sur contratId
+# Fonction création nuage de mots
 def generer_nuage_de_mots_pour_metier(recherche_metier_nettoye,selected_region):
     conn = sqlite3.connect('job_mining.db')
     cursor = conn.cursor()
@@ -122,7 +118,7 @@ def generer_nuage_de_mots_pour_metier(recherche_metier_nettoye,selected_region):
 
     if not competences_data :
         return " Pas d'offres pour cette région "
-    # Ajoutez le code pour générer un nuage de mots avec des données fictives pour le contrat_id spécifié
+    # Ajouter le code pour générer un nuage de mots avec des données fictives 
     else :
         wordcloud_data = Counter(competences_data)
 
@@ -133,7 +129,7 @@ def generer_nuage_de_mots_pour_metier(recherche_metier_nettoye,selected_region):
         plt.axis('off')
         return plt
 
-######################### CARTOGRAPHIE #########################
+################### CARTOGRAPHIE ###################
 
 # Fonction pour créer une carte des régions
 def generer_carte_region_pour_metier(recherche_metier_nettoye):
@@ -141,41 +137,37 @@ def generer_carte_region_pour_metier(recherche_metier_nettoye):
     conn = sqlite3.connect('job_mining.db')
     cursor = conn.cursor()
 
-    #### RECUPERE LES VALEURS ####
-    # Utilisez une requête paramétrée pour éviter les injections SQL
+    ## Récupération des régions associées
     query = f"""
     SELECT LieuTravail_Dimension.nom_region AS Région, COUNT(DISTINCT OffresEmploi_Faits.id) AS Valeur 
     FROM OffresEmploi_Faits JOIN LieuTravail_Dimension ON OffresEmploi_Faits.lieuTravailId = LieuTravail_Dimension.id
     WHERE OffresEmploi_Faits.poste LIKE '%{recherche_metier_nettoye}%'
     GROUP BY LieuTravail_Dimension.nom_region
     """
-    # Exécutez la requête avec un paramètre
+    
     cursor.execute(query)
-    # Récupérez toutes les lignes
+    
     rows = cursor.fetchall()
 
-    # Créez un DataFrame à partir des résultats de la requête
+    # Créer un DataFrame à partir des résultats de la requête
     region_data = pd.DataFrame(rows, columns=['Région', 'Valeur'])
 
 
-    #### RECUPERE LES REGIONS ####
-    # Utilisez une requête paramétrée pour éviter les injections SQL
+    ## Récupération des régions associées
     query = """
     SELECT DISTINCT LieuTravail_Dimension.nom_region
     FROM LieuTravail_Dimension 
     """
-    # Exécutez la requête avec un paramètre
+    
     cursor.execute(query)
-
-    # Récupérez toutes les lignes
+   
     rows = cursor.fetchall()
 
-    # Créez un DataFrame à partir des résultats de la requête
-    #region_france = pd.DataFrame(rows, columns=['Région'])
-
+    # Créer un DataFrame à partir des résultats de la requête
     region_france = pd.read_excel('departements-region.xlsx', usecols=['nom_region'])
     region_france = region_france.rename(columns={'nom_region': 'Région'})
-    #Concatene les deux df
+
+    # Concaténer les deux df
     region_carte_data=pd.merge(region_france, region_data, how='left', left_on='Région', right_on='Région')
     region_carte_data.fillna(0, inplace=True)
     conn.close()
@@ -183,39 +175,34 @@ def generer_carte_region_pour_metier(recherche_metier_nettoye):
     with open('regions.json', 'r') as file:
         regions_data = json.load(file)
 
-    # On crée la carte chloropleth pour les régions
+    # Créer la carte chloropleth pour les régions
     fig_region = px.choropleth(
-        region_carte_data,  # Remplacez df_region par vos données pour les régions
-        geojson=regions_data,  # Utilisez les données chargées à partir du fichier JSON
-        locations='Région',  # Remplacez nom_region par la colonne contenant le nom des régions dans votre dataframe
-        color='Valeur',  # Remplacez Valeur fonciere par la colonne que vous voulez utiliser pour le remplissage
+        region_carte_data,  
+        geojson=regions_data, # Utiliser les données chargées à partir du fichier JSON
+        locations='Région',  
+        color='Valeur', 
         color_continuous_scale='YlOrRd',  # La palette de couleur utilisée
-        featureidkey="properties.libgeo",  # Indiquez le chemin aux IDs dans le GeoJSON
-        range_color=[0, region_carte_data['Valeur'].max()],  # Utilisez la valeur maximale pour la plage de la légende
-        labels={'Valeur': 'Nombre d\'offres'},  # Ajoutez une étiquette pour la légende
+        featureidkey="properties.libgeo", 
+        range_color=[0, region_carte_data['Valeur'].max()],  # Valeur maximale pour la plage de la légende
+        labels={'Valeur': 'Nombre d\'offres'},  # Ajouter une étiquette pour la légende
     )
     fig_region.update_geos(
-        center={"lat": 46.6031, "lon": 1.8883},  # On centre la carte sur une coordonnée légèrement sur la droite de la france pour un meilleur affichage
-        projection_scale=17,  # On ajuste l'échelle pour zoomer sur la phrance
-        visible=False  # On enlève la carte du monde derrière
+        center={"lat": 46.6031, "lon": 1.8883},  # Centrer sur la france pour un meilleur affichage
+        projection_scale=17, 
+        visible=False  # Enlever la carte du monde derrière
     )
 
-    # On ajuste les paramètres graphiques de la carte
+    # Ajuster les paramètres graphiques de la carte
     fig_region.update_layout(
-        # On change ces dimensions
+        # Changer ces dimensions
         autosize=False,
         coloraxis_showscale=True,
         geo=dict(bgcolor='rgba(255, 255, 255, 0)'),
-        margin={"r":0,"t":0,"l":0,"b":0},
-    #     coloraxis_colorbar=dict(
-    #     thickness=15,  # Ajustez l'épaisseur de la légende
-    #     lenmode="fraction",
-    #     len=0.2  # Ajustez la longueur de la légende
-    # )
+        margin={"r":0,"t":0,"l":0,"b":0}
     )
 
 
-    # On change la couleur des tracés
+    # Changer la couleur des tracés
     fig_region.update_traces(marker_line=dict(color="rgb(34,34,34)", width=1))
 
 
@@ -227,29 +214,29 @@ def generer_carte_departement_pour_metier(recherche_metier_nettoye):
     conn = sqlite3.connect('job_mining.db')
     cursor = conn.cursor()
 
-    #### RECUPERE LES VALEURS ####
-    # Utilisez une requête paramétrée pour éviter les injections SQL
+    ## Récupération des départements associées
+
     query = f"""
     SELECT LieuTravail_Dimension.nom_dep AS Département, COUNT(DISTINCT OffresEmploi_Faits.id) AS Valeur 
     FROM OffresEmploi_Faits JOIN LieuTravail_Dimension ON OffresEmploi_Faits.lieuTravailId = LieuTravail_Dimension.id
     WHERE OffresEmploi_Faits.poste LIKE '%{recherche_metier_nettoye}%'
     GROUP BY LieuTravail_Dimension.nom_dep
     """
-    # Exécutez la requête avec un paramètre
+    
     cursor.execute(query)
-    # Récupérez toutes les lignes
+    
     rows = cursor.fetchall()
 
-    # Créez un DataFrame à partir des résultats de la requête
+    # Créer un DataFrame à partir des résultats de la requête
     dep_data = pd.DataFrame(rows, columns=['Département', 'Valeur'])
 
 
-    #### RECUPERE LES DEPARTEMENTS ####
-    # Charger le fichier Excel et sélectionner la colonne "nom_dep"
+    ## Récupération des départements
+    # Charger le fichier Excel en sélectionnant la colonne "nom_dep"
     dep_france = pd.read_excel('departements-region.xlsx', usecols=['nom_dep'])
     dep_france = dep_france.rename(columns={'nom_dep': 'Département'})
 
-    #Concatene les deux df
+    #Concaténer les deux df
     dep_carte_data=pd.merge(dep_france, dep_data, how='left', left_on='Département', right_on='Département')
     dep_carte_data.fillna(0, inplace=True)
     conn.close()
@@ -259,27 +246,25 @@ def generer_carte_departement_pour_metier(recherche_metier_nettoye):
     with open('departement.json', 'r') as file:
         dep_data = json.load(file)
 
-    # On crée la carte chloropleth pour les régions
+    # Créer la carte chloropleth pour les régions
     fig_region = px.choropleth(
-        dep_carte_data,  # Remplacez df_region par vos données pour les régions
-        geojson=dep_data,  # Utilisez les données chargées à partir du fichier JSON
-        locations='Département',  # Remplacez nom_region par la colonne contenant le nom des régions dans votre dataframe
-        color='Valeur',  # Remplacez Valeur fonciere par la colonne que vous voulez utiliser pour le remplissage
+        dep_carte_data, 
+        geojson=dep_data,  # Utiliser les données chargées à partir du fichier JSON
+        locations='Département',
+        color='Valeur',  
         color_continuous_scale='YlOrRd',  # La palette de couleur utilisée
-        featureidkey="properties.libgeo",  # Indiquez le chemin aux IDs dans le GeoJSON
-        range_color=[0,dep_carte_data['Valeur'].max()],  # Indiquez la plage de la légende
+        featureidkey="properties.libgeo",  
+        range_color=[0,dep_carte_data['Valeur'].max()],  # Plage de la légende
         labels={'Valeur': 'Nombre d\'offres'}
     )
     fig_region.update_geos(
-        center={"lat": 46.6031, "lon": 1.8883},  # On centre la carte sur une coordonnée légèrement sur la droite de la france pour un meilleur affichage
-        projection_scale=17,  # On ajuste l'échelle pour zoomer sur la phrance
-        visible=False  # On enlève la carte du monde derrière
+        center={"lat": 46.6031, "lon": 1.8883},  # Centrer sur la france pour un meilleur affichage
+        projection_scale=17,  
+        visible=False  # Enlèver la carte du monde derrière
     )
 
-    # On ajuste les paramètres graphiques de la carte
-    # On ajuste les paramètres graphiques de la carte
+    # Ajuster les paramètres graphiques de la carte
     fig_region.update_layout(
-        # On change ces dimensions
         autosize=False,
         coloraxis_showscale=True,
         margin={"r":0,"t":0,"l":0,"b":0},
@@ -287,30 +272,17 @@ def generer_carte_departement_pour_metier(recherche_metier_nettoye):
     )
 
 
-    # On change la couleur des tracés
+    # Changer la couleur des tracés
     fig_region.update_traces(marker_line=dict(color="rgb(34,34,34)", width=1))
 
 
     return fig_region
 
-# # Fonction pour créer un Barplot avec une condition sur contratId
-# def generer_barplot_diplome_pour_metier(contrat_id):
-#     # Ajoutez le code pour générer un Barplot avec des données fictives pour le contrat_id spécifié
-#     data_barplot = pd.DataFrame({
-#         'Langage': ['Python', 'Java', 'JavaScript', 'C#', 'Ruby'],
-#         'Popularité': [30, 25, 20, 15, 10]
-#     })
 
-#     # Création du Barplot avec Plotly Express
-#     fig_barplot = px.bar(data_barplot, x='Langage', y='Popularité', title=f'Popularité des diplômes pour le métier de : {contrat_id}', color_discrete_sequence=['#FF4B4B'])
-
-#     # Affichage du Barplot
-#     return fig_barplot
-
-######################### KPI #########################
+################### KPI ###################
 
 
-# Fonction pour calculer le nombre d'entreprises avec une condition sur contratId
+# Fonction pour calculer le nombre d'entreprises
 def calculer_nombre_entreprises_pour_metier(recherche_metier_nettoye, selected_region):
     conn = sqlite3.connect('job_mining.db')
     cursor = conn.cursor()
@@ -327,7 +299,7 @@ def calculer_nombre_entreprises_pour_metier(recherche_metier_nettoye, selected_r
     conn.close()
     return nombre_entreprises
 
-# Fonction pour calculer le nombre de villes avec une condition sur contratId
+# Fonction pour calculer le nombre de villes
 def calculer_nombre_villes_pour_metier(recherche_metier_nettoye, selected_region):
     conn = sqlite3.connect('job_mining.db')
     cursor = conn.cursor()
@@ -343,7 +315,7 @@ def calculer_nombre_villes_pour_metier(recherche_metier_nettoye, selected_region
     conn.close()
     return nombre_villes
 
-# Fonction pour calculer le nombre d'offres avec une condition sur contratId
+# Fonction pour calculer le nombre d'offres
 def calculer_nombre_offres_pour_metier(recherche_metier_nettoye, selected_region):
     conn = sqlite3.connect('job_mining.db')
     cursor = conn.cursor()
@@ -358,7 +330,7 @@ def calculer_nombre_offres_pour_metier(recherche_metier_nettoye, selected_region
     conn.close()
     return nombre_offres
 
-
+# Fonction pour calculer le nombre d'offres max et min
 def max_min_region(recherche_metier_nettoye):
 
     conn = sqlite3.connect('job_mining.db')
@@ -403,7 +375,7 @@ def max_min_region(recherche_metier_nettoye):
     cursor.execute(query_moyenne_offres)
     moyenne_offres_region = cursor.fetchone()[0]
 
-    # Remplacez le texte dans le message
+    # Remplacer le texte dans le message
     message = (
         f"On peut voir que la région de {region_moins_offres} est déserte pour le métier de {recherche_metier_nettoye}, "
         f"mais la région de {region_plus_offres} a le plus d'offres. En moyenne, la France a {moyenne_offres_region} offres par région."
@@ -418,7 +390,7 @@ def max_min_region(recherche_metier_nettoye):
 # Analyses Globales #
 #####################  
 
-############# Traitement pour les analyses ##################
+################### Traitement pour les analyses ###################
 def traitement():
 
     conn = sqlite3.connect('job_mining.db')
@@ -486,13 +458,13 @@ def traitement():
     
     
 ############## Fonctions Graphiques ###############
-       
+    
+## Fonctions pour les graphiques d'analyse métier
 def plot_metiers(resultat):
-    # Votre code pour créer yr_5
+    
     yr_5 = resultat.groupby('poste').count().sort_values('id', ascending=False).head(6)
 
-
-    # Créer un graphique à barres interactif avec Plotly Express
+    # Créer un graphique à barres
     fig = px.bar(yr_5, x=yr_5.index, y='id', orientation='v',
                  labels={'id': 'Nombre de résultats', 'poste': 'Poste'} )
 
@@ -508,7 +480,7 @@ def plot_metiers(resultat):
 def plot_mois(resultat):
     monthly_counts = resultat['Mois'].value_counts().sort_index()
 
-    # Créer un graphique barre avec Plotly Express
+    # Créer un graphique barre 
     fig = px.bar(x=monthly_counts.index, y=monthly_counts.values, 
                  labels={'x': 'Mois', 'y': 'Nombre d\'offres'})
 
@@ -525,13 +497,14 @@ def plot_mois(resultat):
 def cam_contrat(resultat):
     count_by_category = resultat['typeContrat'].value_counts()
 
-    # Créer un graphique de type camembert avec Plotly Express
+    # Créer un graphique circulaire
     fig = px.pie(count_by_category, names=count_by_category.index, values=count_by_category.values,
                  labels={'names': 'Type de Contrat', 'values': 'Nombre'},
                  hole=0) 
 
     return fig
 
+## Fonctions pour le calcul du salaire moyen
 def salaire_m(resultat):
     salaire = resultat['Salchiffre']
     salaire.replace('', np.nan, inplace=True)
@@ -561,10 +534,9 @@ def salaire_m_recherche(recherche_metier_nettoye, selected_region):
         SELECT DISTINCT LieuTravail_Dimension.nom_region,LieuTravail_Dimension.id
         FROM LieuTravail_Dimension 
         """
-        # Exécutez la requête avec un paramètre
+        
         cursor.execute(query)
 
-        # Récupérez toutes les lignes
         rows = cursor.fetchall()
 
 
@@ -589,6 +561,7 @@ def salaire_m_recherche(recherche_metier_nettoye, selected_region):
     
     return salaire_moyen
 
+## Fonction pour le graphique sur la négociation des salaires
 def salaire_negociation(resultat):
     
     valeur = ''
@@ -610,14 +583,14 @@ def salaire_negociation(resultat):
 
     return fig
 
-###########ETUDE CORPUS #########################
+############## ETUDE CORPUS ##############
 
 
 
 def corpus_mots(resultat):  
     nb_chars = [len(description) for description in resultat['description']]
 
-    # Créer un histogramme avec Plotly Express
+    # Créer un histogramme
     fig = px.histogram(x=nb_chars, nbins=50, title='Nombre de caractères dans les descriptions',
                     labels={'x': 'Nombre de caractères', 'y': 'Fréquence'})
     return fig
@@ -630,28 +603,28 @@ def frequ_corspus(resultat):
     # Sélection des 10 mots les plus fréquents
     top_words = dict(word_counts.most_common(10))
 
-    # Créer un histogramme avec Plotly Express
+    # Créer un histogramme
     fig = px.bar(x=list(top_words.keys()), y=list(top_words.values()),
                 labels={'x': 'Mots', 'y': 'Fréquence'},
                 title='Mots les plus fréquents dans le corpus')
     return fig
 
 
-###############TF IDF ########################################
+############## TF IDF ##############
 
 
 def TF_IDF_dendogram(resultat):
     textes = resultat['description'].astype('str').tolist()
 
 
-    # Utilisez TfidfVectorizer pour créer une matrice TF-IDF
+    # Créer une matrice TF-IDF
     vectorizer = TfidfVectorizer()
     matrice_tfidf = vectorizer.fit_transform(textes)
 
-    # Obtenez les noms des caractéristiques (mots)
+    # Noms des caractéristiques (mots)
     mots = vectorizer.get_feature_names_out()
 
-    # Créez une DataFrame à partir de la matrice TF-IDF
+    #DataFrame à partir de la matrice TF-IDF
     df_tfidf = pd.DataFrame(matrice_tfidf.toarray(), columns=mots)
     col = ['python', 'sql', 'machine','learning','data','analyse', 'mining', 'warehouse',
  'visualization', 'power','excel', 'savoirfaire', 'satisfaction',
@@ -663,82 +636,15 @@ def TF_IDF_dendogram(resultat):
     
     linkage_matrix = hierarchy.linkage(df_tfidf, method='ward')
 
-# Créer un graphique dendrogramme
+# Créer un dendrogramme
     fig, ax = plt.subplots(figsize=(10, 8))
     dendrogram = hierarchy.dendrogram(linkage_matrix, labels=df_tfidf.index, leaf_rotation=90)
     plt.title('Dendrogramme des Documents')
     return fig
 
 
+############## TABLES ##############
 
-
-
-
-
-def visu_tfidf(resultat):
-    from scipy.cluster.hierarchy import fcluster
-    textes = resultat['description'].astype('str').tolist()
-
-
-    # Utilisez TfidfVectorizer pour créer une matrice TF-IDF
-    vectorizer = TfidfVectorizer()
-    matrice_tfidf = vectorizer.fit_transform(textes)
-
-    # Obtenez les noms des caractéristiques (mots)
-    mots = vectorizer.get_feature_names_out()
-
-    # Créez une DataFrame à partir de la matrice TF-IDF
-    df_tfidf = pd.DataFrame(matrice_tfidf.toarray(), columns=mots)
-    col = ['python', 'sql', 'machine','learning','data','analyse', 'mining', 'warehouse',
- 'visualization', 'power','excel', 'savoirfaire', 'satisfaction',
-'statistique', 'processing', 'nlp', 'social', 
-'deep','learning','artificielle', 'spécialisée', 'spécialisé', 'soutien', 'quality', 'management', 'etl', 'software', 
-'cloud','aws', 'azure', 'universitaire', 'télétravail','travail', 'tensorflow', 'support', 'suivre', 'structure', 'stratégie', 
- 'autonome', 'curiosité', 'flexible', 'adaptabilité']
-    
-    df_tfidf = df_tfidf[col]
-    
-    mots = df_tfidf.columns
-    distances = hierarchy.linkage(df_tfidf, method='ward')
-    # Spécifiez le nombre de clusters (ajustez en fonction de vos besoins)
-    nombre_clusters = 2
-
-    # Attribuez des clusters en fonction du dendrogramme
-    clusters = fcluster(distances, t=nombre_clusters, criterion='maxclust')
-
-    # Ajoutez les informations sur les clusters à votre DataFrame
-    df_tfidf['cluster'] = clusters
-    pca = PCA(n_components=2)
-    resultats_acp = pca.fit_transform(df_tfidf)
-
-    # Coordonnées des documents dans le plan factoriel
-    coord_docs = pd.DataFrame(resultats_acp, columns=['Dimension 1', 'Dimension 2'])
-
-    # Coordonnées des termes dans le plan factoriel (chargements)
-    loadings = pd.DataFrame(pca.components_.T, index=col, columns=['Dimension 1', 'Dimension 2'])
-
-    for cluster in df_tfidf['cluster'].unique():
-        documents_cluster = df_tfidf[df_tfidf['cluster'] == cluster].index
-        plt.scatter(coord_docs.loc[documents_cluster, 'Dimension 1'], coord_docs.loc[documents_cluster, 'Dimension 2'], label=f'Cluster {cluster}')
-
-    # Créez un scatter plot pour les termes (utilisez les loadings)
-    plt.scatter(loadings['Dimension 1'], loadings['Dimension 2'], color='red', marker='^', label='Termes')
-
-    # Ajoutez des annotations pour chaque terme
-    for i, txt in enumerate(mots):
-        plt.annotate(txt, (loadings.iloc[i, 0], loadings.iloc[i, 1]), color='red', fontsize=8)
-
-    # Ajoutez des labels aux axes
-    plt.xlabel('Dimension 1')
-    plt.ylabel('Dimension 2')
-
-    # Ajoutez la légende
-    plt.legend()
-
-    # Affichez le graphe
-    plt.show()
-    
-############################## TABLES #####################################
 def charger_table(selected_table):
     # Connexion à la base de données
     conn = sqlite3.connect('job_mining.db')
