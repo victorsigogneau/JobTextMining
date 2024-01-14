@@ -1,6 +1,8 @@
 import streamlit as st
 from functions import *
 
+# Application
+st.set_page_config(page_title="Analyse des Offres d'Emploi", page_icon="📊")
 
 # CSS input
 st.markdown(
@@ -33,8 +35,6 @@ st.markdown(
 # STREAMLIT #
 #############
 
-# Application
-st.set_page_config(page_title="Analyse des Offres d'Emploi", page_icon="📊")
 
 # Sidebar
 st.sidebar.title("JobAPP")
