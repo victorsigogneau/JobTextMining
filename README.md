@@ -1,4 +1,4 @@
-# Projet Informatique - Text Mining sur le Marché de l'Emploi
+# Text Mining sur le Marché de l'Emploi
 
 ## Introduction
 Ce projet vise à explorer le marché de l’emploi en France. Pour cela, nous avons choisi de nous foca-
