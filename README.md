@@ -27,6 +27,7 @@ Ce projet vise à analyser le marché de l'emploi en France en utilisant des tec
     - `ExtractDATA_LoadDB.ipynb`: Script d'extraction et de prétraitement des données.
     - `analyses_globales.ipynb`: Analyses NLP globales utiles et mise en prodcution dans le Stramlit.
     - `departements-region.xlsx`: Tables des correspondances des régions, départements
+
 - `interface/`: Dans ce répertoire, vous trouverez tous les composants nécessaires au lancement de l'application.
   - `interface.py`: Code source de l'application Streamlit.
   - `functions.py`: Functions de l'application Streamlit.
@@ -34,6 +35,7 @@ Ce projet vise à analyser le marché de l'emploi en France en utilisant des tec
   - `departement.json`: Coordonées des départements.
   - `regions.json`: Coordonnées des régions.
   - `departements-region.xlsx`: Tables des correspondances des régions, départements
+
 - `README.md`: Vous êtes ici!
 
 ## Auteurs
